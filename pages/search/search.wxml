@@ -1,0 +1,272 @@
+<!--pages/search/search.wxml-->
+<view class="page">
+  <!-- 搜索框 -->
+  <view class="search-header">
+    <view class="search-box">
+      <input class="search-input" 
+             placeholder="搜索摩托车型号、品牌" 
+             value="{{searchKeyword}}"
+             bindinput="onSearchInput"
+             bindconfirm="performSearch"
+             confirm-type="search"
+             focus="{{showKeyboard}}"
+             cursor-spacing="10"/>
+      <view class="search-actions">
+        <text class="clear-btn" wx:if="{{searchKeyword}}" bindtap="clearSearch">✕</text>
+        <text class="search-btn" bindtap="performSearch">搜索</text>
+      </view>
+    </view>
+    <text class="cancel-btn" bindtap="goBack">取消</text>
+  </view>
+
+  <!-- 搜索建议 -->
+  <view class="search-suggestions" wx:if="{{showSuggestions && suggestions.length > 0}}">
+    <view class="suggestion-item" 
+          wx:for="{{suggestions}}" 
+          wx:key="*this"
+          bindtap="selectSuggestion" 
+          data-keyword="{{item}}">
+      <text class="suggestion-icon">🔍</text>
+      <text class="suggestion-text">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 搜索历史和热门搜索 -->
+  <view class="search-content" wx:if="{{!showResults}}">
+    <!-- 搜索历史 -->
+    <view class="history-section" wx:if="{{searchHistory.length > 0}}">
+      <view class="section-header">
+        <text class="section-title">搜索历史</text>
+        <text class="clear-all" bindtap="clearHistory">清空</text>
+      </view>
+      <view class="history-tags">
+        <view class="history-tag" 
+              wx:for="{{searchHistory}}" 
+              wx:key="*this"
+              bindtap="selectHistory" 
+              data-keyword="{{item}}">
+          {{item}}
+          <text class="remove-tag" bindtap="removeHistory" data-keyword="{{item}}" catchtap="true">✕</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 热门搜索 -->
+    <view class="hot-section">
+      <view class="section-header">
+        <text class="section-title">热门搜索</text>
+      </view>
+      <view class="hot-tags">
+        <view class="hot-tag" 
+              wx:for="{{hotKeywords}}" 
+              wx:key="*this"
+              bindtap="selectHotKeyword" 
+              data-keyword="{{item}}">
+          {{item}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 热门品牌 -->
+    <view class="brands-section">
+      <view class="section-header">
+        <text class="section-title">热门品牌</text>
+      </view>
+      <view class="brands-grid">
+        <view class="brand-item" 
+              wx:for="{{hotBrands}}" 
+              wx:key="name"
+              bindtap="selectBrand" 
+              data-brand="{{item.name}}">
+          <image src="{{item.logo}}" class="brand-logo"></image>
+          <text class="brand-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="search-results" wx:if="{{showResults}}">
+    <!-- 筛选栏 -->
+    <view class="filter-bar">
+      <view class="filter-item" bindtap="showSortOptions">
+        <text class="filter-text">{{sortText}}</text>
+        <text class="filter-arrow">▼</text>
+      </view>
+      <view class="filter-item" bindtap="showMoreFilters">
+        <text class="filter-text">筛选</text>
+        <text class="filter-arrow">▼</text>
+      </view>
+      <view class="result-count">
+        <text>共{{totalCount}}个结果</text>
+      </view>
+    </view>
+
+    <!-- 摩托车列表 -->
+    <view class="motorcycle-list">
+      <view class="motorcycle-item" 
+            wx:for="{{searchResults}}" 
+            wx:key="_id"
+            bindtap="goToDetail" 
+            data-id="{{item._id}}">
+        <image src="{{item.images[0].url}}" class="motorcycle-image" mode="aspectFill"></image>
+        <view class="motorcycle-info">
+          <view class="info-header">
+            <text class="motorcycle-name">{{item.brand}} {{item.model}}</text>
+            <text class="motorcycle-year">{{item.year}}年</text>
+          </view>
+          <text class="motorcycle-price">¥{{item.price.msrp}}</text>
+          <view class="motorcycle-specs">
+            <text class="spec-item">{{item.engine.displacement}}cc</text>
+            <text class="spec-item">{{item.performance.power.hp}}HP</text>
+            <text class="spec-item">{{item.category}}</text>
+          </view>
+          <view class="rating" wx:if="{{item.rating}}">
+            <view class="stars">
+              <text class="star {{index < item.rating.overall ? 'filled' : ''}}" 
+                    wx:for="{{[1,2,3,4,5]}}" wx:key="*this">★</text>
+            </view>
+            <text class="rating-text">{{item.rating.reviews}}条评价</text>
+          </view>
+        </view>
+        <view class="action-buttons">
+          <text class="favorite-btn {{item.isFavorited ? 'favorited' : ''}}" 
+                bindtap="toggleFavorite" 
+                data-id="{{item._id}}" 
+                catchtap="true">♡</text>
+          <text class="compare-btn" 
+                bindtap="addToCompare" 
+                data-id="{{item._id}}" 
+                catchtap="true">对比</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore && !loading}}">
+      <text class="load-more-text" bindtap="loadMore">加载更多</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="loading" wx:if="{{loading}}">
+      <text>搜索中...</text>
+    </view>
+
+    <!-- 空结果 -->
+    <view class="empty-result" wx:if="{{searchResults.length === 0 && !loading && showResults}}">
+      <image src="/images/empty-search.png" class="empty-icon"></image>
+      <text class="empty-text">没有找到相关摩托车</text>
+      <text class="empty-tip">试试其他关键词</text>
+    </view>
+  </view>
+
+  <!-- 排序选项面板 -->
+  <view class="sort-panel" wx:if="{{showSortPanel}}">
+    <view class="panel-mask" bindtap="hideSortPanel"></view>
+    <view class="panel-content">
+      <view class="panel-header">
+        <text class="panel-title">排序方式</text>
+        <text class="panel-close" bindtap="hideSortPanel">✕</text>
+      </view>
+      <view class="sort-options">
+        <view class="sort-option {{sortBy === 'relevance' ? 'active' : ''}}" 
+              bindtap="selectSort" 
+              data-sort="relevance">
+          <text class="option-text">相关度</text>
+          <text class="option-check" wx:if="{{sortBy === 'relevance'}}">✓</text>
+        </view>
+        <view class="sort-option {{sortBy === 'price_asc' ? 'active' : ''}}" 
+              bindtap="selectSort" 
+              data-sort="price_asc">
+          <text class="option-text">价格从低到高</text>
+          <text class="option-check" wx:if="{{sortBy === 'price_asc'}}">✓</text>
+        </view>
+        <view class="sort-option {{sortBy === 'price_desc' ? 'active' : ''}}" 
+              bindtap="selectSort" 
+              data-sort="price_desc">
+          <text class="option-text">价格从高到低</text>
+          <text class="option-check" wx:if="{{sortBy === 'price_desc'}}">✓</text>
+        </view>
+        <view class="sort-option {{sortBy === 'year_desc' ? 'active' : ''}}" 
+              bindtap="selectSort" 
+              data-sort="year_desc">
+          <text class="option-text">年份最新</text>
+          <text class="option-check" wx:if="{{sortBy === 'year_desc'}}">✓</text>
+        </view>
+        <view class="sort-option {{sortBy === 'rating_desc' ? 'active' : ''}}" 
+              bindtap="selectSort" 
+              data-sort="rating_desc">
+          <text class="option-text">评分最高</text>
+          <text class="option-check" wx:if="{{sortBy === 'rating_desc'}}">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选面板 -->
+  <view class="filter-panel" wx:if="{{showFilterPanel}}">
+    <view class="panel-mask" bindtap="hideFilterPanel"></view>
+    <view class="panel-content">
+      <view class="panel-header">
+        <text class="panel-title">筛选条件</text>
+        <text class="panel-close" bindtap="hideFilterPanel">✕</text>
+      </view>
+      <scroll-view class="filter-content" scroll-y="{{true}}">
+        <!-- 品牌筛选 -->
+        <view class="filter-group">
+          <text class="group-title">品牌</text>
+          <view class="filter-options">
+            <view class="filter-option {{selectedBrands.indexOf(item) !== -1 ? 'selected' : ''}}" 
+                  wx:for="{{availableBrands}}" 
+                  wx:key="*this"
+                  bindtap="toggleBrand" 
+                  data-brand="{{item}}">
+              {{item}}
+            </view>
+          </view>
+        </view>
+
+        <!-- 类型筛选 -->
+        <view class="filter-group">
+          <text class="group-title">类型</text>
+          <view class="filter-options">
+            <view class="filter-option {{selectedCategories.indexOf(item) !== -1 ? 'selected' : ''}}" 
+                  wx:for="{{availableCategories}}" 
+                  wx:key="*this"
+                  bindtap="toggleCategory" 
+                  data-category="{{item}}">
+              {{item}}
+            </view>
+          </view>
+        </view>
+
+        <!-- 价格筛选 -->
+        <view class="filter-group">
+          <text class="group-title">价格范围</text>
+          <view class="price-range">
+            <text>{{minPrice || 0}}万 - {{maxPrice || '不限'}}万</text>
+          </view>
+          <view class="price-slider">
+            <slider min="0" 
+                    max="50" 
+                    step="1" 
+                    value="{{minPrice || 0}}" 
+                    bindchange="onMinPriceChange" 
+                    activeColor="#3b82f6"/>
+            <slider min="0" 
+                    max="50" 
+                    step="1" 
+                    value="{{maxPrice || 50}}" 
+                    bindchange="onMaxPriceChange" 
+                    activeColor="#3b82f6"/>
+          </view>
+        </view>
+      </scroll-view>
+      
+      <view class="filter-actions">
+        <button class="reset-btn" bindtap="resetFilters">重置</button>
+        <button class="apply-btn" bindtap="applyFilters">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

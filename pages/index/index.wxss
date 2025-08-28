@@ -1,0 +1,222 @@
+/* pages/index/index.wxss */
+.page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 搜索栏 */
+.search-bar {
+  background-color: #fff;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.search-input {
+  background-color: #f5f5f5;
+  border-radius: 50rpx;
+  height: 70rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+}
+
+.placeholder {
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 轮播图 */
+.banner {
+  height: 300rpx;
+  margin-bottom: 20rpx;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 分类导航 */
+.categories {
+  background-color: #fff;
+  padding: 30rpx 20rpx;
+  margin-bottom: 20rpx;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30rpx;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.category-icon {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+.category-name {
+  font-size: 24rpx;
+  color: #333;
+}
+
+/* 板块 */
+.section {
+  background-color: #fff;
+  margin-bottom: 20rpx;
+  padding: 30rpx 20rpx 20rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.section-more {
+  font-size: 24rpx;
+  color: #3b82f6;
+}
+
+/* 摩托车列表 */
+.motorcycle-list {
+  white-space: nowrap;
+}
+
+.motorcycle-item {
+  display: inline-block;
+  width: 200rpx;
+  margin-right: 20rpx;
+  vertical-align: top;
+}
+
+.motorcycle-item:last-child {
+  margin-right: 0;
+}
+
+.motorcycle-image {
+  width: 100%;
+  height: 150rpx;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.motorcycle-info {
+  text-align: center;
+}
+
+.motorcycle-name {
+  display: block;
+  font-size: 24rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.motorcycle-price {
+  display: block;
+  font-size: 22rpx;
+  color: #ef4444;
+  font-weight: bold;
+}
+
+/* 新闻列表 */
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.news-item {
+  display: flex;
+  gap: 24rpx;
+}
+
+.news-image {
+  width: 200rpx;
+  height: 120rpx;
+  border-radius: 8rpx;
+  flex-shrink: 0;
+}
+
+.news-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.news-title {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.news-time {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 空状态 */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400rpx;
+  color: #999;
+}
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 28rpx;
+}
+
+/* 响应式适配 */
+@media (max-width: 375px) {
+  .categories {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .motorcycle-item {
+    width: 160rpx;
+  }
+  
+  .news-image {
+    width: 160rpx;
+    height: 100rpx;
+  }
+}

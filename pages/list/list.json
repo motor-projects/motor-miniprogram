@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "摩托车列表",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f5f5f5",
+  "backgroundTextStyle": "dark",
+  "onReachBottomDistance": 50,
+  "usingComponents": {}
+}

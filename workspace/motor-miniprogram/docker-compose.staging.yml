@@ -1,0 +1,163 @@
+version: '3.8'
+
+# 测试环境配置 - 适度的资源分配和监控
+services:
+  nginx:
+    extends:
+      file: docker-compose.yml
+      service: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NGINX_ENV=staging
+    volumes:
+      - ./nginx/ssl/staging:/etc/ssl/certs:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+
+  backend:
+    extends:
+      file: docker-compose.yml
+      service: backend
+    environment:
+      - NODE_ENV=staging
+      - LOG_LEVEL=debug
+      - RATE_LIMIT_MAX_REQUESTS=200
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.2'
+
+  web-frontend:
+    extends:
+      file: docker-compose.yml
+      service: web-frontend
+    environment:
+      - NODE_ENV=staging
+      - VITE_API_BASE_URL=https://api-staging.motor-projects.com
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+
+  mobile-web:
+    extends:
+      file: docker-compose.yml
+      service: mobile-web
+    environment:
+      - NODE_ENV=staging
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+
+  mongo-primary:
+    extends:
+      file: docker-compose.yml
+      service: mongo-primary
+    command: >
+      mongod --replSet rs0 --bind_ip_all --port 27017 
+      --keyFile /opt/keyfile --oplogSize 64
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # 测试环境只保留一个MongoDB副本
+  redis:
+    extends:
+      file: docker-compose.yml
+      service: redis
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+
+  prometheus:
+    extends:
+      file: docker-compose.yml
+      service: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.enable-lifecycle'
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+
+  grafana:
+    extends:
+      file: docker-compose.yml
+      service: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-staging123}
+      - GF_USERS_ALLOW_SIGN_UP=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+
+  loki:
+    extends:
+      file: docker-compose.yml
+      service: loki
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+
+  promtail:
+    extends:
+      file: docker-compose.yml
+      service: promtail
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.1'
+
+  node-exporter:
+    extends:
+      file: docker-compose.yml
+      service: node-exporter
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+          cpus: '0.1'
+
+# 移除测试环境不需要的MongoDB副本
+networks:
+  motor-network:
+    driver: bridge
+
+volumes:
+  mongo_primary_data:
+  mongo_primary_config:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  uploads:
+  logs:
+  static_files:

@@ -1,0 +1,93 @@
+# 摩托车性能数据系统 - 后端 Dockerfile
+# 基于 Node.js 18 Alpine 版本
+FROM node:18-alpine AS base
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装系统依赖（包括 Python）
+RUN apk add --no-cache \
+    dumb-init \
+    curl \
+    tzdata \
+    python3 \
+    py3-pip \
+    && rm -rf /var/cache/apk/*
+
+# 设置时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 创建非 root 用户
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# =============================================================================
+# Dependencies 阶段 - 安装依赖
+# =============================================================================
+FROM base AS deps
+
+# 复制 package 文件
+COPY package*.json ./
+
+# 安装生产依赖
+RUN npm ci --only=production && npm cache clean --force
+
+# =============================================================================
+# Builder 阶段 - 构建应用
+# =============================================================================
+FROM base AS builder
+
+# 复制 package 文件和共享代码
+COPY package*.json ./
+COPY ../motor-shared/ /app/motor-shared/
+
+# 安装所有依赖（包括开发依赖）
+RUN npm ci
+
+# 复制源代码
+COPY . .
+COPY ../motor-shared/ /app/motor-shared/
+
+# 安装 Python 依赖
+RUN pip3 install -r requirements.txt
+
+# 如果有 TypeScript 构建步骤，在这里添加
+# RUN npm run build
+
+# =============================================================================
+# 生产环境
+# =============================================================================
+FROM base AS runner
+
+# 设置环境变量
+ENV NODE_ENV=production
+ENV PORT=5000
+
+# 复制依赖
+COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
+
+# 复制应用代码
+COPY --from=builder --chown=nodejs:nodejs /app ./
+
+# 创建必要的目录
+RUN mkdir -p /app/logs /app/uploads /app/temp && \
+    chown -R nodejs:nodejs /app
+
+# 创建健康检查脚本
+RUN echo '#!/bin/sh\ncurl -f http://localhost:5000/api/health || exit 1' > /healthcheck.sh && \
+    chmod +x /healthcheck.sh
+
+# 切换到非 root 用户
+USER nodejs
+
+# 暴露端口
+EXPOSE 5000
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD /healthcheck.sh
+
+# 启动应用
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "index.js"]

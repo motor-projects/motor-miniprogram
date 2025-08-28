@@ -1,0 +1,34 @@
+{
+  "name": "@motor-projects/motor-core",
+  "version": "1.0.0",
+  "description": "Motor Projects Core Monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "backend:dev": "turbo run dev --filter=backend",
+    "web:dev": "turbo run dev --filter=web",
+    "shared:build": "turbo run build --filter=shared",
+    "test:all": "turbo run test --parallel",
+    "build:all": "turbo run build --parallel"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "@turbo/gen": "^1.10.0"
+  },
+  "packageManager": "npm@9.0.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

@@ -1,0 +1,164 @@
+<!--pages/profile/profile.wxml-->
+<view class="page">
+  <!-- 用户信息 -->
+  <view class="user-info card">
+    <view class="user-header">
+      <image src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" class="user-avatar" bindtap="chooseAvatar"></image>
+      <view class="user-details">
+        <text class="user-name">{{userInfo.nickName || '未登录'}}</text>
+        <text class="user-desc" wx:if="{{userInfo.nickName}}">摩托车爱好者</text>
+        <view class="login-section" wx:if="{{!userInfo.nickName}}">
+          <button class="login-btn" bindtap="login" open-type="getUserProfile">
+            微信登录
+          </button>
+        </view>
+      </view>
+      <view class="user-actions" wx:if="{{userInfo.nickName}}">
+        <text class="action-btn" bindtap="goToSettings">设置</text>
+      </view>
+    </view>
+    
+    <view class="user-stats" wx:if="{{userInfo.nickName}}">
+      <view class="stat-item" bindtap="goToFavorites">
+        <text class="stat-number">{{stats.favorites || 0}}</text>
+        <text class="stat-label">收藏</text>
+      </view>
+      <view class="stat-item" bindtap="goToHistory">
+        <text class="stat-number">{{stats.history || 0}}</text>
+        <text class="stat-label">浏览</text>
+      </view>
+      <view class="stat-item" bindtap="goToReviews">
+        <text class="stat-number">{{stats.reviews || 0}}</text>
+        <text class="stat-label">评价</text>
+      </view>
+      <view class="stat-item" bindtap="goToCompare">
+        <text class="stat-number">{{compareCount || 0}}</text>
+        <text class="stat-label">对比</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <!-- 我的收藏 -->
+    <view class="menu-group card">
+      <view class="menu-item" bindtap="goToFavorites">
+        <view class="menu-icon">♡</view>
+        <text class="menu-text">我的收藏</text>
+        <view class="menu-badge" wx:if="{{stats.favorites > 0}}">{{stats.favorites}}</view>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="goToHistory">
+        <view class="menu-icon">🕘</view>
+        <text class="menu-text">浏览历史</text>
+        <view class="menu-badge" wx:if="{{stats.history > 0}}">{{stats.history}}</view>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="goToCompare">
+        <view class="menu-icon">⚖</view>
+        <text class="menu-text">对比车型</text>
+        <view class="menu-badge" wx:if="{{compareCount > 0}}">{{compareCount}}</view>
+        <text class="menu-arrow">></text>
+      </view>
+    </view>
+
+    <!-- 我的评价 -->
+    <view class="menu-group card" wx:if="{{userInfo.nickName}}">
+      <view class="menu-item" bindtap="goToReviews">
+        <view class="menu-icon">⭐</view>
+        <text class="menu-text">我的评价</text>
+        <view class="menu-badge" wx:if="{{stats.reviews > 0}}">{{stats.reviews}}</view>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="goToFeedback">
+        <view class="menu-icon">💬</view>
+        <text class="menu-text">意见反馈</text>
+        <text class="menu-arrow">></text>
+      </view>
+    </view>
+
+    <!-- 设置和服务 -->
+    <view class="menu-group card">
+      <view class="menu-item" bindtap="goToSettings">
+        <view class="menu-icon">⚙</view>
+        <text class="menu-text">设置</text>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="goToAbout">
+        <view class="menu-icon">ℹ</view>
+        <text class="menu-text">关于我们</text>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="contactCustomerService">
+        <view class="menu-icon">📞</view>
+        <text class="menu-text">客服支持</text>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="shareApp">
+        <view class="menu-icon">📤</view>
+        <text class="menu-text">推荐给朋友</text>
+        <text class="menu-arrow">></text>
+      </view>
+    </view>
+
+    <!-- 版本信息 -->
+    <view class="version-info">
+      <text class="version-text">版本 {{version}}</text>
+    </view>
+
+    <!-- 退出登录 -->
+    <view class="logout-section" wx:if="{{userInfo.nickName}}">
+      <button class="logout-btn" bindtap="logout">退出登录</button>
+    </view>
+  </view>
+
+  <!-- 登录提示 -->
+  <view class="login-prompt" wx:if="{{!userInfo.nickName}}">
+    <image src="/images/login-prompt.png" class="prompt-icon"></image>
+    <text class="prompt-title">登录后体验更多功能</text>
+    <text class="prompt-desc">收藏车型、查看历史、发表评价</text>
+    <button class="prompt-login-btn" bindtap="login" open-type="getUserProfile">
+      立即登录
+    </button>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions" wx:if="{{userInfo.nickName}}">
+    <view class="action-grid">
+      <view class="action-item" bindtap="goToFavorites">
+        <view class="action-icon">♡</view>
+        <text class="action-label">收藏</text>
+      </view>
+      <view class="action-item" bindtap="goToHistory">
+        <view class="action-icon">🕘</view>
+        <text class="action-label">历史</text>
+      </view>
+      <view class="action-item" bindtap="goToCompare">
+        <view class="action-icon">⚖</view>
+        <text class="action-label">对比</text>
+      </view>
+      <view class="action-item" bindtap="shareApp">
+        <view class="action-icon">📤</view>
+        <text class="action-label">分享</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 推荐功能 -->
+  <view class="recommendations card" wx:if="{{recommendations.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">为你推荐</text>
+    </view>
+    <scroll-view class="recommendation-list" scroll-x="{{true}}">
+      <view class="recommendation-item" 
+            wx:for="{{recommendations}}" 
+            wx:key="_id"
+            bindtap="goToDetail" 
+            data-id="{{item._id}}">
+        <image src="{{item.images[0].url}}" class="recommendation-image"></image>
+        <text class="recommendation-name">{{item.brand}} {{item.model}}</text>
+        <text class="recommendation-price">¥{{item.price.msrp}}</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

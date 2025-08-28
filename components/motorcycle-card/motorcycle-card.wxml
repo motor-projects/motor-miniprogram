@@ -1,0 +1,37 @@
+<!--components/motorcycle-card/motorcycle-card.wxml-->
+<view class="motorcycle-card" bindtap="onCardTap">
+  <image src="{{motorcycle.images[0].url}}" class="motorcycle-image" mode="aspectFill"></image>
+  
+  <view class="card-content">
+    <view class="card-header">
+      <text class="motorcycle-name">{{motorcycle.brand}} {{motorcycle.model}}</text>
+      <text class="motorcycle-year">{{motorcycle.year}}年</text>
+    </view>
+    
+    <text class="motorcycle-price" wx:if="{{motorcycle.price}}">¥{{motorcycle.price.msrp}}</text>
+    
+    <view class="motorcycle-specs">
+      <text class="spec-item" wx:if="{{motorcycle.engine.displacement}}">{{motorcycle.engine.displacement}}cc</text>
+      <text class="spec-item" wx:if="{{motorcycle.performance.power.hp}}">{{motorcycle.performance.power.hp}}HP</text>
+      <text class="spec-item" wx:if="{{motorcycle.category}}">{{motorcycle.category}}</text>
+    </view>
+    
+    <view class="card-rating" wx:if="{{motorcycle.rating && motorcycle.rating.overall > 0}}">
+      <view class="rating-stars">
+        <text class="star {{index < motorcycle.rating.overall ? 'filled' : ''}}" 
+              wx:for="{{[1,2,3,4,5]}}" wx:key="*this">★</text>
+      </view>
+      <text class="rating-text">{{motorcycle.rating.reviews}}条评价</text>
+    </view>
+  </view>
+  
+  <view class="card-actions">
+    <view class="action-btn favorite-btn {{motorcycle.isFavorited ? 'favorited' : ''}}" 
+          bindtap="onFavoriteTap" catchtap="true">
+      <text class="action-icon">♡</text>
+    </view>
+    <view class="action-btn compare-btn" bindtap="onCompareTap" catchtap="true">
+      <text class="action-icon">⚖</text>
+    </view>
+  </view>
+</view>

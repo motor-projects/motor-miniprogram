@@ -1,0 +1,399 @@
+<!--pages/detail/detail.wxml-->
+<view class="page">
+  <!-- 图片轮播 -->
+  <swiper class="image-swiper" indicator-dots="{{true}}" indicator-color="rgba(255,255,255,0.5)" 
+          indicator-active-color="#fff" circular="{{true}}">
+    <swiper-item wx:for="{{motorcycle.images}}" wx:key="url" bindtap="previewImage" data-index="{{index}}">
+      <image src="{{item.url}}" class="detail-image" mode="aspectFill"></image>
+    </swiper-item>
+  </swiper>
+
+  <!-- 基本信息 -->
+  <view class="basic-info card">
+    <view class="info-header">
+      <view class="title-section">
+        <text class="motorcycle-name">{{motorcycle.brand}} {{motorcycle.model}}</text>
+        <text class="motorcycle-year">{{motorcycle.year}}年</text>
+      </view>
+      <view class="action-buttons">
+        <view class="action-btn" bindtap="toggleFavorite">
+          <text class="icon {{motorcycle.isFavorited ? 'favorited' : ''}}">♡</text>
+          <text class="label">{{motorcycle.isFavorited ? '已收藏' : '收藏'}}</text>
+        </view>
+        <view class="action-btn" bindtap="shareMotorcycle">
+          <text class="icon">↗</text>
+          <text class="label">分享</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="price-section" wx:if="{{motorcycle.price}}">
+      <text class="price-label">厂商指导价</text>
+      <text class="price-value">¥{{motorcycle.price.msrp}}</text>
+    </view>
+
+    <view class="rating-section" wx:if="{{motorcycle.rating}}">
+      <view class="rating-score">
+        <text class="score">{{motorcycle.rating.overall}}</text>
+        <view class="stars">
+          <text class="star {{index < motorcycle.rating.overall ? 'filled' : ''}}" 
+                wx:for="{{[1,2,3,4,5]}}" wx:key="*this">★</text>
+        </view>
+      </view>
+      <text class="rating-text">{{motorcycle.rating.reviews}}条评价</text>
+      <text class="rating-link" bindtap="goToReviews">查看全部 ></text>
+    </view>
+
+    <view class="quick-specs">
+      <view class="spec-item">
+        <text class="spec-label">排量</text>
+        <text class="spec-value">{{motorcycle.engine.displacement}}cc</text>
+      </view>
+      <view class="spec-item">
+        <text class="spec-label">功率</text>
+        <text class="spec-value">{{motorcycle.performance.power.hp}}HP</text>
+      </view>
+      <view class="spec-item">
+        <text class="spec-label">扭矩</text>
+        <text class="spec-value">{{motorcycle.performance.torque.nm}}N·m</text>
+      </view>
+      <view class="spec-item">
+        <text class="spec-label">最高时速</text>
+        <text class="spec-value">{{motorcycle.performance.topSpeed}}km/h</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 导航标签 -->
+  <view class="nav-tabs">
+    <view class="tab-item {{activeTab === 'specs' ? 'active' : ''}}" 
+          bindtap="changeTab" data-tab="specs">
+      技术参数
+    </view>
+    <view class="tab-item {{activeTab === 'features' ? 'active' : ''}}" 
+          bindtap="changeTab" data-tab="features">
+      配置特点
+    </view>
+    <view class="tab-item {{activeTab === 'reviews' ? 'active' : ''}}" 
+          bindtap="changeTab" data-tab="reviews">
+      用户评价
+    </view>
+    <view class="tab-item {{activeTab === 'compare' ? 'active' : ''}}" 
+          bindtap="changeTab" data-tab="compare">
+      对比
+    </view>
+  </view>
+
+  <!-- 技术参数 -->
+  <view class="content-section" wx:if="{{activeTab === 'specs'}}">
+    <!-- 发动机参数 -->
+    <view class="spec-group card" wx:if="{{motorcycle.engine}}">
+      <view class="group-title">发动机参数</view>
+      <view class="spec-list">
+        <view class="spec-row" wx:if="{{motorcycle.engine.type}}">
+          <text class="spec-name">发动机类型</text>
+          <text class="spec-content">{{motorcycle.engine.type}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.engine.displacement}}">
+          <text class="spec-name">排量</text>
+          <text class="spec-content">{{motorcycle.engine.displacement}}cc</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.engine.bore && motorcycle.engine.stroke}}">
+          <text class="spec-name">缸径×行程</text>
+          <text class="spec-content">{{motorcycle.engine.bore}}×{{motorcycle.engine.stroke}}mm</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.engine.compressionRatio}}">
+          <text class="spec-name">压缩比</text>
+          <text class="spec-content">{{motorcycle.engine.compressionRatio}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.engine.cooling}}">
+          <text class="spec-name">冷却方式</text>
+          <text class="spec-content">{{motorcycle.engine.cooling}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.engine.fuelSystem}}">
+          <text class="spec-name">供油方式</text>
+          <text class="spec-content">{{motorcycle.engine.fuelSystem}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.engine.maxRpm}}">
+          <text class="spec-name">最大转速</text>
+          <text class="spec-content">{{motorcycle.engine.maxRpm}}rpm</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 性能参数 -->
+    <view class="spec-group card" wx:if="{{motorcycle.performance}}">
+      <view class="group-title">性能参数</view>
+      <view class="spec-list">
+        <view class="spec-row" wx:if="{{motorcycle.performance.power}}">
+          <text class="spec-name">最大功率</text>
+          <text class="spec-content">{{motorcycle.performance.power.hp}}HP / {{motorcycle.performance.power.kw}}kW @ {{motorcycle.performance.power.rpm}}rpm</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.performance.torque}}">
+          <text class="spec-name">最大扭矩</text>
+          <text class="spec-content">{{motorcycle.performance.torque.nm}}N·m / {{motorcycle.performance.torque.lbft}}lb-ft @ {{motorcycle.performance.torque.rpm}}rpm</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.performance.topSpeed}}">
+          <text class="spec-name">最高时速</text>
+          <text class="spec-content">{{motorcycle.performance.topSpeed}}km/h</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.performance.acceleration}}">
+          <text class="spec-name">0-100km/h加速</text>
+          <text class="spec-content">{{motorcycle.performance.acceleration.zeroToHundred}}秒</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.performance.fuelEconomy}}">
+          <text class="spec-name">油耗</text>
+          <text class="spec-content">市区{{motorcycle.performance.fuelEconomy.city}}L/100km, 郊区{{motorcycle.performance.fuelEconomy.highway}}L/100km</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 车身参数 -->
+    <view class="spec-group card" wx:if="{{motorcycle.dimensions}}">
+      <view class="group-title">车身参数</view>
+      <view class="spec-list">
+        <view class="spec-row" wx:if="{{motorcycle.dimensions.length}}">
+          <text class="spec-name">车身尺寸(长×宽×高)</text>
+          <text class="spec-content">{{motorcycle.dimensions.length}}×{{motorcycle.dimensions.width}}×{{motorcycle.dimensions.height}}mm</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.dimensions.wheelbase}}">
+          <text class="spec-name">轴距</text>
+          <text class="spec-content">{{motorcycle.dimensions.wheelbase}}mm</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.dimensions.seatHeight}}">
+          <text class="spec-name">座高</text>
+          <text class="spec-content">{{motorcycle.dimensions.seatHeight}}mm</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.dimensions.groundClearance}}">
+          <text class="spec-name">离地间隙</text>
+          <text class="spec-content">{{motorcycle.dimensions.groundClearance}}mm</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.dimensions.weight}}">
+          <text class="spec-name">整备质量</text>
+          <text class="spec-content">{{motorcycle.dimensions.weight.wet}}kg</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.dimensions.fuelCapacity}}">
+          <text class="spec-name">油箱容积</text>
+          <text class="spec-content">{{motorcycle.dimensions.fuelCapacity}}L</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 传动系统 -->
+    <view class="spec-group card" wx:if="{{motorcycle.transmission}}">
+      <view class="group-title">传动系统</view>
+      <view class="spec-list">
+        <view class="spec-row" wx:if="{{motorcycle.transmission.type}}">
+          <text class="spec-name">变速箱</text>
+          <text class="spec-content">{{motorcycle.transmission.type}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.transmission.gears}}">
+          <text class="spec-name">档位数</text>
+          <text class="spec-content">{{motorcycle.transmission.gears}}档</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 悬挂制动 -->
+    <view class="spec-group card">
+      <view class="group-title">悬挂制动</view>
+      <view class="spec-list">
+        <view class="spec-row" wx:if="{{motorcycle.suspension.front}}">
+          <text class="spec-name">前悬挂</text>
+          <text class="spec-content">{{motorcycle.suspension.front}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.suspension.rear}}">
+          <text class="spec-name">后悬挂</text>
+          <text class="spec-content">{{motorcycle.suspension.rear}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.brakes.front}}">
+          <text class="spec-name">前制动</text>
+          <text class="spec-content">{{motorcycle.brakes.front}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.brakes.rear}}">
+          <text class="spec-name">后制动</text>
+          <text class="spec-content">{{motorcycle.brakes.rear}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.brakes.abs}}">
+          <text class="spec-name">ABS</text>
+          <text class="spec-content">{{motorcycle.brakes.abs ? '有' : '无'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 轮胎轮毂 -->
+    <view class="spec-group card" wx:if="{{motorcycle.wheels}}">
+      <view class="group-title">轮胎轮毂</view>
+      <view class="spec-list">
+        <view class="spec-row" wx:if="{{motorcycle.wheels.front}}">
+          <text class="spec-name">前轮</text>
+          <text class="spec-content">{{motorcycle.wheels.front.size}} / {{motorcycle.wheels.front.tire}}</text>
+        </view>
+        <view class="spec-row" wx:if="{{motorcycle.wheels.rear}}">
+          <text class="spec-name">后轮</text>
+          <text class="spec-content">{{motorcycle.wheels.rear.size}} / {{motorcycle.wheels.rear.tire}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 配置特点 -->
+  <view class="content-section" wx:if="{{activeTab === 'features'}}">
+    <view class="features-grid card" wx:if="{{motorcycle.features && motorcycle.features.length > 0}}">
+      <view class="group-title">主要配置</view>
+      <view class="feature-list">
+        <view class="feature-item" wx:for="{{motorcycle.features}}" wx:key="*this">
+          <text class="feature-icon">✓</text>
+          <text class="feature-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="colors-section card" wx:if="{{motorcycle.colors && motorcycle.colors.length > 0}}">
+      <view class="group-title">可选颜色</view>
+      <view class="color-list">
+        <view class="color-item" wx:for="{{motorcycle.colors}}" wx:key="name">
+          <view class="color-swatch" style="background-color: {{item.hex}}"></view>
+          <text class="color-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 用户评价 -->
+  <view class="content-section" wx:if="{{activeTab === 'reviews'}}">
+    <view class="reviews-summary card" wx:if="{{motorcycle.rating}}">
+      <view class="summary-header">
+        <view class="overall-rating">
+          <text class="rating-score">{{motorcycle.rating.overall}}</text>
+          <view class="rating-stars">
+            <text class="star {{index < motorcycle.rating.overall ? 'filled' : ''}}" 
+                  wx:for="{{[1,2,3,4,5]}}" wx:key="*this">★</text>
+          </view>
+          <text class="rating-count">基于{{motorcycle.rating.reviews}}条评价</text>
+        </view>
+      </view>
+
+      <view class="rating-breakdown" wx:if="{{motorcycle.rating.breakdown}}">
+        <view class="breakdown-item">
+          <text class="breakdown-label">性能</text>
+          <view class="breakdown-bar">
+            <view class="breakdown-fill" style="width: {{motorcycle.rating.breakdown.performance * 20}}%"></view>
+          </view>
+          <text class="breakdown-score">{{motorcycle.rating.breakdown.performance}}</text>
+        </view>
+        <view class="breakdown-item">
+          <text class="breakdown-label">舒适</text>
+          <view class="breakdown-bar">
+            <view class="breakdown-fill" style="width: {{motorcycle.rating.breakdown.comfort * 20}}%"></view>
+          </view>
+          <text class="breakdown-score">{{motorcycle.rating.breakdown.comfort}}</text>
+        </view>
+        <view class="breakdown-item">
+          <text class="breakdown-label">可靠性</text>
+          <view class="breakdown-bar">
+            <view class="breakdown-fill" style="width: {{motorcycle.rating.breakdown.reliability * 20}}%"></view>
+          </view>
+          <text class="breakdown-score">{{motorcycle.rating.breakdown.reliability}}</text>
+        </view>
+        <view class="breakdown-item">
+          <text class="breakdown-label">性价比</text>
+          <view class="breakdown-bar">
+            <view class="breakdown-fill" style="width: {{motorcycle.rating.breakdown.value * 20}}%"></view>
+          </view>
+          <text class="breakdown-score">{{motorcycle.rating.breakdown.value}}</text>
+        </view>
+        <view class="breakdown-item">
+          <text class="breakdown-label">外观</text>
+          <view class="breakdown-bar">
+            <view class="breakdown-fill" style="width: {{motorcycle.rating.breakdown.styling * 20}}%"></view>
+          </view>
+          <text class="breakdown-score">{{motorcycle.rating.breakdown.styling}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="reviews-list">
+      <view class="review-item card" wx:for="{{reviews}}" wx:key="_id">
+        <view class="review-header">
+          <image src="{{item.user.avatar || '/images/default-avatar.png'}}" class="user-avatar"></image>
+          <view class="review-info">
+            <text class="user-name">{{item.user.username}}</text>
+            <view class="review-rating">
+              <text class="star {{index < item.rating.overall ? 'filled' : ''}}" 
+                    wx:for="{{[1,2,3,4,5]}}" wx:key="*this">★</text>
+            </view>
+            <text class="review-date">{{item.createdAt}}</text>
+          </view>
+        </view>
+        <text class="review-title">{{item.title}}</text>
+        <text class="review-content">{{item.content}}</text>
+        <view class="review-images" wx:if="{{item.images && item.images.length > 0}}">
+          <image wx:for="{{item.images}}" wx:key="*this" src="{{item}}" class="review-image" 
+                 mode="aspectFill" bindtap="previewReviewImage" data-images="{{item.images}}" data-current="{{item}}"></image>
+        </view>
+        <view class="review-actions">
+          <text class="helpful-btn {{item.isHelpful ? 'active' : ''}}" bindtap="toggleHelpful" data-id="{{item._id}}">
+            👍 有用 {{item.helpful.count}}
+          </text>
+        </view>
+      </view>
+    </view>
+
+    <view class="load-more-reviews" wx:if="{{hasMoreReviews}}">
+      <text class="load-more-btn" bindtap="loadMoreReviews">加载更多评价</text>
+    </view>
+
+    <view class="empty-reviews" wx:if="{{reviews.length === 0}}">
+      <text>暂无评价，成为第一个评价的人吧</text>
+    </view>
+  </view>
+
+  <!-- 对比 -->
+  <view class="content-section" wx:if="{{activeTab === 'compare'}}">
+    <view class="compare-section card">
+      <view class="group-title">添加对比</view>
+      <view class="compare-current">
+        <image src="{{motorcycle.images[0].url}}" class="compare-image"></image>
+        <text class="compare-name">{{motorcycle.brand}} {{motorcycle.model}}</text>
+      </view>
+      
+      <view class="compare-actions">
+        <button class="compare-btn" bindtap="addToCompare">
+          {{isInCompare ? '已加入对比' : '加入对比'}}
+        </button>
+        <button class="compare-btn primary" bindtap="goToCompare" wx:if="{{compareCount > 1}}">
+          查看对比 ({{compareCount}})
+        </button>
+      </view>
+
+      <view class="compare-similar">
+        <view class="group-title">相似车型</view>
+        <scroll-view class="similar-list" scroll-x="{{true}}">
+          <view class="similar-item" wx:for="{{similarMotorcycles}}" wx:key="_id" 
+                bindtap="goToDetail" data-id="{{item._id}}">
+            <image src="{{item.images[0].url}}" class="similar-image"></image>
+            <text class="similar-name">{{item.brand}} {{item.model}}</text>
+            <text class="similar-price">¥{{item.price.msrp}}</text>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-actions">
+    <button class="action-btn outline" bindtap="goToReviews">
+      查看评价
+    </button>
+    <button class="action-btn outline" bindtap="addToCompare">
+      {{isInCompare ? '已加入对比' : '加入对比'}}
+    </button>
+    <button class="action-btn primary" bindtap="contactDealer" wx:if="{{motorcycle.dealer}}">
+      联系经销商
+    </button>
+    <button class="action-btn primary" open-type="share">
+      分享
+    </button>
+  </view>
+</view>
